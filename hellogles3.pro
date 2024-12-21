@@ -1,12 +1,9 @@
-HEADERS = glwindow.h \
-          logo.h \
-          cameraopenglwidget.h \
+HEADERS = \
           video_player.h \
           video_reader.h
 
-SOURCES = glwindow.cpp \
+SOURCES = \
           main.cpp \
-          logo.cpp \
           video_reader.cpp
 
 RESOURCES += hellogles3.qrc

@@ -13,6 +13,12 @@ class VideoPlayerWidget : public QOpenGLWidget, protected QOpenGLFunctions {
 public:
   VideoPlayerWidget(QWidget *parent = nullptr)
       : QOpenGLWidget(parent), texture(0), frameData(nullptr) {
+
+    //        if (!video_reader_open(&vr_state, "/dev/video0")) {
+    //                printf("Couldn't open video device\n");
+    //                return;
+    //        }
+
     if (!video_reader_open_file(&vr_state,
                                 "/home/zhang/Downloads/big_buck_bunny.mp4")) {
       printf("Couldn't open video device\n");
@@ -21,8 +27,7 @@ public:
     // 为视频帧数据分配内存
     frame_width = vr_state.width;
     frame_height = vr_state.height;
-    frameData =
-        new uint8_t[frame_width * frame_height * 4]; // 1920x1080，3字节每像素
+    frameData = new uint8_t[frame_width * frame_height * 4];
     // 初始化定时器，每秒30帧
     frameUpdateTimer = new QTimer(this);
     connect(frameUpdateTimer, &QTimer::timeout, this,
@@ -32,9 +37,6 @@ public:
 
   ~VideoPlayerWidget() {
     // 清理资源
-    if (texture) {
-      // delete texture;
-    }
     if (frameData) {
       delete[] frameData;
     }
@@ -59,8 +61,6 @@ protected:
     glViewport(0, 0, w, h); // 设置视口大小为窗口的宽度和高度
 
     glMatrixMode(GL_PROJECTION);
-    // glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-
     glLoadIdentity();
     glOrtho(0, w, h, 0, -1, 1);
     //    GLenum err;
@@ -77,8 +77,6 @@ protected:
     //    glClear(GL_COLOR_BUFFER_BIT); // 清空画布
 
     if (texture) {
-      //      qDebug() << 1;
-      //      glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, texture);
 
       glBegin(GL_QUADS);
@@ -91,7 +89,6 @@ protected:
       glTexCoord2d(0, 1);
       glVertex2i(0, frame_height);
       glEnd();
-      // glDisable(GL_TEXTURE_2D);
     }
   }
 
@@ -106,20 +103,12 @@ public slots:
       //      if (texture) {
       //        glDeleteTextures(1, &texture); // 释放旧的纹理
       //      }
-      // glEnable(GL_TEXTURE_2D);
       //      glGenTextures(1, &texture);
       glBindTexture(GL_TEXTURE_2D, texture);
 
       // 使用 glTexImage2D 来加载纹理，使用 RGBA 格式的原始数据
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0,
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0,
                    GL_RGBA, GL_UNSIGNED_BYTE, frameData);
-      // 设置纹理过滤和环绕方式
-      //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      //
 
       // 更新界面
       update(); // 调用 paintGL() 绘制图像
@@ -129,7 +118,6 @@ public slots:
 private:
   int frame_width, frame_height;
   VideoReaderState vr_state{};
-  // QOpenGLTexture *texture;
   GLuint texture; // OpenGL 纹理句柄
   uint8_t *frameData;
   QTimer *frameUpdateTimer;
